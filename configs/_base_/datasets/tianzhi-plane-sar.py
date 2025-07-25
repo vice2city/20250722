@@ -1,6 +1,6 @@
 # dataset settings
 dataset_type = 'DOTADataset'
-data_root = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/data/split_ss_plane_sar/" 
+data_root = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/data/split_plane_sar/" 
 classes = ('A220', 'A330', 'A320/321', 'Boeing737-800', 'Boeing787', 'ARJ21', 'other')
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)

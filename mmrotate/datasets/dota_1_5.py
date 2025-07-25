@@ -313,6 +313,7 @@ class DOTADataset15(CustomDataset):
                     json files when submission_dir is not specified.
         """
         nproc = min(nproc, os.cpu_count())
+        import ipdb;ipdb.set_trace()
         assert isinstance(results, list), 'results must be a list'
         assert len(results) == len(self), (
             f'The length of results is not equal to '

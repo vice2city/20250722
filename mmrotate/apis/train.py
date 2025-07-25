@@ -22,7 +22,6 @@ def train_detector(model,
 
     cfg = compat_cfg(cfg)
     logger = get_root_logger(log_level=cfg.log_level)
-
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
 
@@ -43,8 +42,13 @@ def train_detector(model,
         **train_dataloader_default_args,
         **cfg.data.get('train_dataloader', {})
     }
-
+    # for ds in dataset:
+    #     print(ds)
+    #     break
     data_loaders = [build_dataloader(ds, **train_loader_cfg) for ds in dataset]
+
+
+    print("check3!")
 
     # put model on gpus
     if distributed:
@@ -59,6 +63,8 @@ def train_detector(model,
     else:
         model = MMDataParallel(
             model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+    print("check4!")
+    # import ipdb;ipdb.set_trace()
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
@@ -133,7 +139,8 @@ def train_detector(model,
         resume_from = find_latest_checkpoint(cfg.work_dir)
     if resume_from is not None:
         cfg.resume_from = resume_from
-
+    print("check5!")
+    # import ipdb;ipdb.set_trace()
     if cfg.resume_from:
         runner.resume(cfg.resume_from)
     elif cfg.load_from:

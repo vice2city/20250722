@@ -16,10 +16,17 @@ from mmdet.apis import multi_gpu_test, single_gpu_test
 from mmdet.datasets import build_dataloader, replace_ImageToTensor
 
 from mmrotate.datasets import build_dataset
-from mmrotate.models import build_detector
+from mmrotate.models import build_detector 
 from mmrotate.utils import compat_cfg, setup_multi_processes
 from tools import add_xml
-from tools.data.car.split import img_split as car_img_split
+from tools.data.car.split import img_split_1,img_split_2
+import glob
+
+def get_file_names(folder_path):
+    file_names = glob.glob(os.path.join(folder_path, '*.tif'))
+    file_names = [os.path.splitext(os.path.basename(file))[0] for file in file_names if os.path.isfile(file)]
+    return file_names
+
 
 def parse_args():
     """Parse parameters."""
@@ -103,25 +110,15 @@ def parse_args():
 
     return args
 
-
-def main():
-    args = parse_args()
-    ##  plane 
-    # args.config = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/configs/lsknet-tianhzibei/lsk_s_ema_fpn_1x_plane_all_le90.py"
-    # args.checkpoint = "/data5/laiping/tianzhibei/code/model_path/plane/epoch_56.pth"
-    # args.format_only = True
-    # args.eval_options = {"submission_dir":"/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/work_dirs/test1"}
-    # save_dirs = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/data/test1/test"
-    ## car
+def car_test(args):
     args.config = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/configs/lsknet-tianhzibei/lsk_s_ema_fpn_1x_car_all_le90.py"
-    args.checkpoint = "/data5/laiping/tianzhibei/code/model_path/car/epoch_29.pth"
+    args.checkpoint = "/data5/laiping/tianzhibei/code/model_path/car/car.pth"
     args.format_only = True
-    args.eval_options = {"submission_dir":"/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/work_dirs/car-test"}
-    save_dirs = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/data/car-test/test"
+    args.eval_options = {"submission_dir":"/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/work_dirs/car-test-new"}
+    save_dirs = "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/data/car-test-new/test"
+
+    img_split_1.main(args.input_path,save_dirs)
     print(args)
-    
-    # plane_img_split.main(args.input_path,save_dirs)
-    car_img_split.main(args.input_path,save_dirs)
 
 
     assert args.out or args.eval or args.format_only or args.show \
@@ -292,6 +289,14 @@ def main():
             # import ipdb;ipdb.set_trace()
     add_xml.main(args.eval_options["submission_dir"],args.output_path)
 
+def main():
+    args = parse_args()
+    files_list = get_file_names(args.input_path)
+    print(len(files_list))
+    for i,files in enumerate(files_list):
+        add_xml.create_blank_xml(files,args.output_path,"Optical")
+    car_test(args)
 
 if __name__ == '__main__':
+    # # 运行你的代码
     main()

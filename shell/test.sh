@@ -1,15 +1,27 @@
-# CUDA_VISIBLE_DEVICES=3 python ./tools/test.py  \
-#   /data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/configs/lsknet/lsk_s_fpn_1x_dota_le90.py \
-#   /data5/laiping/tianzhibei/checkpoint/lsk_s_fpn_1x_dota_le90_20230116-99749191.pth --format-only \
-#   --eval-options submission_dir=work_dirs/Task1_results1
-# python ./tools/test.py  \
-#   /data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/configs/oriented_reppoints/oriented_reppoints_r50_fpn_1x_dota_le135.py \
-#   /data5/laiping/tianzhibei/checkpoint/oriented_reppoints_r50_fpn_1x_dota_le135-ef072de9.pth --eval mAP --gpu-ids 1
+python /data5/laiping/tianzhibei/code/object_detection/test_one_stage_recognition.py \
+ --gallery_path /data5/laiping/tianzhibei/pretrain_datasets/FAIR1M/val/input_path \
+ --gallery_gt /data5/laiping/tianzhibei/pretrain_datasets/FAIR1M/val/gt  \
+ --xml_output_path /data5/laiping/tianzhibei/test-recogntion-5-20-1/output_path \
+ --eval-options submission_dir=/data5/laiping/tianzhibei/test-recogntion-5-20-1/work_dirs \
+ --checkpoint /data5/laiping/tianzhibei/checkpoint/lsknet_s_fair_epoch12.pth \
+ --config /data5/laiping/tianzhibei/code/object_detection/configs/lsknet/lsk_s_fpn_1x_fair_le90.py \
+ --save_dirs /data5/laiping/tianzhibei/test-recogntion-5-20-1/test \
+ --evaluation True
 
-# CUDA_VISIBLE_DEVICES=3 python ./tools/test.py  \
-#   /data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/configs/lsknet-tianhzibei/lsk_s_ema_fpn_1x_plane_sar_le90.py \
-#   /data5/laiping/tianzhibei/exp/LSKNet-plane-sar/latest.pth --format-only \
-#   --eval-options submission_dir=/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/work_dirs/plane_results_sar_new --output_path "/data5/laiping/tianzhibei/code/Large-Selective-Kernel-Network/output_path/SAR"
+# gallery_path="/code/dataset/images",
+# gallery_gt="/code/dataset/xml",
+# xml_output_path="/code/output_path",
+# eval-options="submission_dir=/code/work_dirs",
+# checkpoint="/code/checkpoint/lsk_s_ema_fpn_1x_dota_le90_20230212-30ed4041.pth",
+# config="code/object_detection/configs/lsknet/lsk_s_ema_fpn_1x_dota_le90.py",
+# evaluation="True"
 
-# python ./tools/run_plane.py  /data5/laiping/tianzhibei/code/input_path/plane /data5/laiping/tianzhibei/code/output_path
-python ./tools/run_car.py  /data5/laiping/tianzhibei/code/input_path/car /data5/laiping/tianzhibei/code/output_path/car
+# python /code/object_detection/test_one_stage_recognition_cpu.py \
+#  --gallery_path /code/datset/DOTA/images \
+#  --gallery_gt /code/datset/DOTA/xml \
+#  --xml_output_path /code/output_path/test-12-20/output_path \
+#  --eval-options submission_dir=/code/work_dirs/test-12-20 \
+#  --checkpoint /code/checkpoint/lsk_s_ema_fpn_1x_dota_le90_20230212-30ed4041.pth \
+#  --config /code/object_detection/configs/lsknet/lsk_s_ema_fpn_1x_dota_le90.py \
+#  --save_dirs /code/temp/test \
+#  --evaluation True

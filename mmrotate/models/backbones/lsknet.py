@@ -50,13 +50,14 @@ class LSKblock(nn.Module):
         attn2 = self.conv2(attn2)
         
         attn = torch.cat([attn1, attn2], dim=1)
+        # attn = torch.cat([attn1, attn2], dim=1)
         avg_attn = torch.mean(attn, dim=1, keepdim=True)
         max_attn, _ = torch.max(attn, dim=1, keepdim=True)
         agg = torch.cat([avg_attn, max_attn], dim=1)
         sig = self.conv_squeeze(agg).sigmoid()
-        attn = attn1 * sig[:,0,:,:].unsqueeze(1) + attn2 * sig[:,1,:,:].unsqueeze(1)
+        attn = (attn1 * sig[:,0,:,:].unsqueeze(1) + attn2 * sig[:,1,:,:].unsqueeze(1))
         attn = self.conv(attn)
-        return x * attn
+        return (x * attn)
 
 
 
@@ -75,19 +76,22 @@ class Attention(nn.Module):
         x = self.activation(x)
         x = self.spatial_gating_unit(x)
         x = self.proj_2(x)
-        x = x + shorcut
+        x = (x + shorcut)
         return x
 
 
 class Block(nn.Module):
     def __init__(self, dim, mlp_ratio=4., drop=0.,drop_path=0., act_layer=nn.GELU, norm_cfg=None):
         super().__init__()
-        if norm_cfg:
-            self.norm1 = build_norm_layer(norm_cfg, dim)[1]
-            self.norm2 = build_norm_layer(norm_cfg, dim)[1]
-        else:
-            self.norm1 = nn.BatchNorm2d(dim)
-            self.norm2 = nn.BatchNorm2d(dim)
+        # if norm_cfg:
+        #     self.norm1 = build_norm_layer(norm_cfg, dim)[1]
+        #     self.norm2 = build_norm_layer(norm_cfg, dim)[1]
+        # # else:
+        #     self.norm1 = nn.BatchNorm2d(dim)
+        #     self.norm2 = nn.BatchNorm2d(dim)
+        
+        self.norm1 = nn.BatchNorm2d(dim)
+        self.norm2 = nn.BatchNorm2d(dim)
         self.attn = Attention(dim)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         mlp_hidden_dim = int(dim * mlp_ratio)
@@ -99,8 +103,8 @@ class Block(nn.Module):
             layer_scale_init_value * torch.ones((dim)), requires_grad=True)
 
     def forward(self, x):
-        x = x + self.drop_path(self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(self.norm1(x)))
-        x = x + self.drop_path(self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x)))
+        x = (x + self.drop_path(self.layer_scale_1.unsqueeze(-1).unsqueeze(-1) * self.attn(self.norm1(x))))
+        x = (x + self.drop_path(self.layer_scale_2.unsqueeze(-1).unsqueeze(-1) * self.mlp(self.norm2(x))))
         return x
 
 
@@ -113,14 +117,27 @@ class OverlapPatchEmbed(nn.Module):
         patch_size = to_2tuple(patch_size)
         self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=stride,
                               padding=(patch_size[0] // 2, patch_size[1] // 2))
-        if norm_cfg:
-            self.norm = build_norm_layer(norm_cfg, embed_dim)[1]
-        else:
-            self.norm = nn.BatchNorm2d(embed_dim)
+        # if norm_cfg:
+        #     self.norm = build_norm_layer(norm_cfg, embed_dim)[1]
+        # else:
+        self.norm = nn.BatchNorm2d(embed_dim)
 
 
     def forward(self, x):
-        x = self.proj(x)
+        try:
+            x = self.proj(x)
+        except:
+            try:
+                x = self.proj(x.data[0])
+            except:
+                try:
+                    x = self.proj(x.to(torch.float32))
+                except:
+                    try:
+                        x = self.proj(x.to(torch.float16))
+                    except:
+                        x = self.proj(x.unsqueeze(0))
+
         _, _, H, W = x.shape
         x = self.norm(x)        
         return x, H, W
@@ -204,8 +221,10 @@ class LSKNet(BaseModule):
         self.head = nn.Linear(self.embed_dim, num_classes) if num_classes > 0 else nn.Identity()
 
     def forward_features(self, x):
-        
-        B = x.shape[0]
+        try:
+            B = x.shape[0]
+        except:
+            B = x.data[0].shape[0]
         outs = []
         for i in range(self.num_stages):
             patch_embed = getattr(self, f"patch_embed{i + 1}")

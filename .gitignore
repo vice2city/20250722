@@ -122,3 +122,7 @@ tmp
 
 # custom
 mmrotate/.mim
+data/
+outputs/
+temp_file/
+.dist_test/

@@ -150,8 +150,14 @@ class OrientedStandardRoIHead(RotatedStandardRoIHead):
 
         rois = rbbox2roi(proposals)
         bbox_results = self._bbox_forward(x, rois)
-        img_shapes = tuple(meta['img_shape'] for meta in img_metas)
-        scale_factors = tuple(meta['scale_factor'] for meta in img_metas)
+
+        try:
+            img_shapes = tuple(meta['img_shape'] for meta in img_metas)
+            scale_factors = tuple(meta['scale_factor'] for meta in img_metas)
+        except:
+            img_metas = img_metas.data
+            img_shapes = tuple(meta[0]['img_shape'] for meta in img_metas)
+            scale_factors = tuple(meta[0]['scale_factor'] for meta in img_metas)
 
         # split batch bbox prediction back to each image
         cls_score = bbox_results['cls_score']

@@ -1,6 +1,9 @@
 # dataset settings
-dataset_type = 'DOTADataset'
-data_root = "/data5/laiping/tianzhibei/code/mmrotate/data/split_ss_dota/" 
+dataset_type = 'FairDataset'
+# data_root = "/data5/laiping/tianzhibei/data/fair1m_v2/"
+data_root = "/data5/laiping/tianzhibei/data/fair1m_v2_new/"
+classes = ('Boeing777', 'Boeing747',  'A220', 'A330', 'A350', 'C919', 'ARJ21', 'other-airplane',  'Motorboat','Tugboat', 'Engineering_Ship',  'Dry_Cargo_Ship', 'Warship', 'other-ship',  'Bus',  'Dump_Truck', 'Van',  'Tractor', 'Truck_Tractor', 'Excavator', 'other-vehicle', 'Baseball_Field', 'Basketball_Court', 'Tennis_Court', 'Roundabout', 'Bridge')
+# classes = ('Boeing737',   'Boeing787', 'A321',      'Passenger_Ship', 'Fishing_Boat', 'Liquid_Cargo_Ship',   'Small_Car', 'Cargo_Truck',  'Trailer',  'Football_Field',  'Intersection' )
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -32,8 +35,8 @@ data = dict(
     workers_per_gpu=4,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'trainval/annfiles/',
-        img_prefix=data_root + 'trainval/images/',
+        ann_file=data_root + 'train/annfiles/',
+        img_prefix=data_root + 'train/images/',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,

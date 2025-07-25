@@ -36,6 +36,12 @@ class FairDataset(CustomDataset):
     'Liquid_Cargo_Ship', 'Dry_Cargo_Ship', 'Warship', 'other-ship', 'Small_Car', 'Bus', 'Cargo_Truck', 
     'Dump_Truck', 'Van', 'Trailer', 'Tractor', 'Truck_Tractor', 'Excavator', 'other-vehicle',
     'Baseball_Field', 'Basketball_Court', 'Football_Field', 'Tennis_Court', 'Roundabout', 'Intersection', 'Bridge')
+
+
+    # CLASSES = ('Boeing777', 'Boeing747',  'A220', 'A330', 'A350', 'C919', 'ARJ21', 'other-airplane',  'Motorboat','Tugboat', 'Engineering_Ship',  'Dry_Cargo_Ship', 'Warship', 'other-ship',  'Bus',  'Dump_Truck', 'Van',  'Tractor', 'Truck_Tractor', 'Excavator', 'other-vehicle', 'Baseball_Field', 'Basketball_Court', 'Tennis_Court', 'Roundabout', 'Bridge')
+
+    
+    # CLASSES = ('Boeing737',   'Boeing787', 'A321', 'Passenger_Ship', 'Fishing_Boat', 'Liquid_Cargo_Ship',   'Small_Car', 'Cargo_Truck',  'Trailer',  'Football_Field',  'Intersection')
     
     
     # CLASSES = ('Boeing_737', 'Boeing_777', 'Boeing747', 'Boeing_787', 'Airbus_A320', 
@@ -323,8 +329,33 @@ class FairDataset(CustomDataset):
                 t.write(f, osp.split(f)[-1])
 
         return files
+    
 
-    def format_results(self, results, submission_dir=None, nproc=4, **kwargs):
+    def _results2bboxs(self, id_list, dets_list, out_folder=None):
+        """Generate the submission of full images.
+
+        Args:
+            id_list (list): Id of images.
+            dets_list (list): Detection results of per class.
+            out_folder (str, optional): Folder of submission.
+        """
+        results = []
+        confidence = 0.5
+        for img_id, dets_per_cls in zip(id_list, dets_list):
+            for cls, dets in zip(self.CLASSES, dets_per_cls):
+                if dets.size == 0:
+                    continue
+                bboxes = obb2poly_np(dets, self.version)
+                for bbox in bboxes:
+                    # if bbox[-1] - confidence > 0:
+                    #     txt_element = [img_id, cls, str(bbox[-1])] + [f'{p:.2f}' for p in bbox[:-1]]
+                    #     results.append(txt_element)
+                    txt_element = [img_id, cls, str(bbox[-1])] + [f'{p:.2f}' for p in bbox[:-1]]
+                    results.append(txt_element)
+
+        return results
+
+    def format_results(self, results, bboxes_flag=False, submission_dir=None, nproc=4, **kwargs):
         """Format the results to submission text (standard format for DOTA
         evaluation).
 
@@ -357,12 +388,12 @@ class FairDataset(CustomDataset):
         id_list, dets_list = self.merge_det(results, nproc)
         stop_time = time.time()
         print(f'Used time: {(stop_time - start_time):.1f} s')
-
-        result_files = self._results2submission(id_list, dets_list,
-                                                submission_dir)
-
-        return result_files, tmp_dir
-
+        if bboxes_flag:
+            bboxes = self._results2bboxs(id_list,dets_list)
+            return bboxes
+        else:
+            result_files = self._results2submission(id_list, dets_list, submission_dir)
+            return result_files, tmp_dir
 
 def _merge_func(info, CLASSES, iou_thr):
     """Merging patch bboxes into full image.

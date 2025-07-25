@@ -411,19 +411,35 @@ class RotatedRPNHead(AnchorHead):
             featmap_sizes, device=device)
 
         result_list = []
-        for img_id, _ in enumerate(img_metas):
-            cls_score_list = [
-                cls_scores[i][img_id].detach() for i in range(num_levels)
-            ]
-            bbox_pred_list = [
-                bbox_preds[i][img_id].detach() for i in range(num_levels)
-            ]
-            img_shape = img_metas[img_id]['img_shape']
-            scale_factor = img_metas[img_id]['scale_factor']
-            proposals = self._get_bboxes_single(cls_score_list, bbox_pred_list,
-                                                mlvl_anchors, img_shape,
-                                                scale_factor, cfg, rescale)
-            result_list.append(proposals)
+        try:
+            for img_id, _ in enumerate(img_metas):
+                cls_score_list = [
+                    cls_scores[i][img_id].detach() for i in range(num_levels)
+                ]
+                bbox_pred_list = [
+                    bbox_preds[i][img_id].detach() for i in range(num_levels)
+                ]
+                img_shape = img_metas[img_id]['img_shape']
+                scale_factor = img_metas[img_id]['scale_factor']
+                proposals = self._get_bboxes_single(cls_score_list, bbox_pred_list,
+                                                    mlvl_anchors, img_shape,
+                                                    scale_factor, cfg, rescale)
+                result_list.append(proposals)
+        except:
+            img_metas = img_metas.data
+            for img_id, _ in enumerate(img_metas):
+                cls_score_list = [
+                    cls_scores[i][img_id].detach() for i in range(num_levels)
+                ]
+                bbox_pred_list = [
+                    bbox_preds[i][img_id].detach() for i in range(num_levels)
+                ]
+                img_shape = img_metas[img_id][0]['img_shape']
+                scale_factor = img_metas[img_id][0]['scale_factor']
+                proposals = self._get_bboxes_single(cls_score_list, bbox_pred_list,
+                                                    mlvl_anchors, img_shape,
+                                                    scale_factor, cfg, rescale)
+                result_list.append(proposals)
         return result_list
 
     def _get_bboxes_single(self,

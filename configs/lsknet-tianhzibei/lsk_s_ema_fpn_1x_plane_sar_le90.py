@@ -3,7 +3,7 @@ _base_ = [
     '../_base_/default_runtime.py'
 ]
 
-angle_version = 'le90'
+angle_version = 'oc'
 gpu_number = 8
 # fp16 = dict(loss_scale='dynamic')
 model = dict(
@@ -14,7 +14,7 @@ model = dict(
         drop_rate=0.1,
         drop_path_rate=0.1,
         depths=[2,2,4,2],
-        init_cfg=dict(type='Pretrained', checkpoint="/data5/laiping/tianzhibei/checkpoint/lsk_s_backbone-e9d2e551.pth"),
+        init_cfg=dict(type='Pretrained', checkpoint="/data5/laiping/tianzhibei/checkpoint/sar_pretrain_model.pth"),
         norm_cfg=dict(type='SyncBN', requires_grad=True)),
     neck=dict(
         type='FPN',

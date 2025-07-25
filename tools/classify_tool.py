@@ -1,0 +1,156 @@
+import glob
+import os
+import xml.etree.ElementTree as ET
+from tqdm import tqdm
+from shapely.geometry import Polygon
+
+# results_folder_path = '/data5/laiping/tianzhibei/demo/output_path/demo-test-11-11'
+# gt_folder_path = '/data5/laiping/tianzhibei/demo/gallery/gt_rotate'
+# classified_folder_path = '/data5/laiping/tianzhibei/demo/demo_classified'
+# iou_thresh = 0.3
+
+
+class DetectionPoint:
+    def __init__(self, name, points):
+        self.class_name = name
+        self.points = points  # [(x1, y1), ... , (x4, y4)]
+        self.min_x = min([p[0] for p in points])
+        self.min_y = min([p[1] for p in points])
+        self.max_x = max([p[0] for p in points])
+        self.max_y = max([p[1] for p in points])
+    
+    def write_name(self, name):
+        if self.class_name == name:
+            return
+        # print(f'object {self.class_name} changes to {name}')
+        self.class_name = name
+
+    def __repr__(self):
+        return f"DetectionPoint(class_name={self.class_name}, points={self.points}, min_x={self.min_x}, min_y={self.min_y}, max_x={self.max_x}, max_y={self.max_y})"
+    
+    def __str__(self):
+        return f"DetectionPoint: {self.class_name} with bounding points {self.points}, min_x={self.min_x}, min_y={self.min_y}, max_x={self.max_x}, max_y={self.max_y}"
+
+
+def get_points(file_path):
+    """从 XML 文件中获取目标的相关信息"""
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    obj_list = []
+    for obj in root.findall('.//objects/object'):
+        name = "_".join(obj.findall('.//name')[0].text.split())
+        points_list = obj.findall('.//point')
+        pos_list = []
+        for points in points_list:
+            points_data = points.text.split(",")
+            pos_list.append((float(points_data[0]), float(points_data[1])))
+        assert len(pos_list) >= 4, f'points lose: {file_path}'
+        pos_list = pos_list[:4]
+        obj_list.append(DetectionPoint(name, pos_list))
+    return obj_list
+
+
+def calculate_iou_rotated(obj1, obj2):
+    """计算两个旋转矩形框的 IoU"""
+    poly1 = Polygon(obj1.points)
+    poly2 = Polygon(obj2.points)
+
+    if not poly1.intersects(poly2):
+        return 0
+
+    intersection_area = poly1.intersection(poly2).area
+    union_area = poly1.union(poly2).area
+
+    iou = intersection_area / union_area if union_area > 0 else 0.0
+    return iou
+
+
+def evaluate_image(result_path, gt_path):
+    """对比同一图像的预测结果和真实标签"""
+    result_objects = get_points(result_path)
+    gt_objects = get_points(gt_path)
+
+    # 搜索所有匹配的检测框
+    for r_obj in result_objects:
+        for gt_obj in gt_objects:
+            # 两个框的最小外接矩形不重叠，直接判定它们不相交
+            if (r_obj.max_x <= gt_obj.min_x or r_obj.min_x >= gt_obj.max_x
+                    or r_obj.max_y <= gt_obj.min_y or r_obj.min_y >= gt_obj.max_y):
+                continue
+            # 计算 IoU
+            iou = calculate_iou_rotated(r_obj, gt_obj)
+            # 该预测框与真实框匹配
+            if iou >= 0.3:
+                r_obj.write_name(gt_obj.class_name)
+                gt_objects.remove(gt_obj)
+                break
+        else:
+            # 与任何真实框不匹配的检测框
+            r_obj.write_name('background')
+    return result_objects
+
+
+def indent(elem, level=0):
+    # 添加元素的缩进
+    indent_size = 4
+    i = "\n" + level * indent_size * " "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + indent_size * " "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent(elem, level + 1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
+
+
+def make_xml(file_path, object_list,classified_folder_path):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    objects = root.find('objects')
+    root.remove(objects)
+    objects = ET.SubElement(root, "objects")
+    for obj in object_list:
+        # 创建新的 object 元素及其子元素
+        new_object = ET.Element('object')
+        coordinate = ET.SubElement(new_object, 'coordinate')
+        coordinate.text = 'pixel'
+        t_ype = ET.SubElement(new_object, 'type')
+        t_ype.text = 'rectangle'
+        description = ET.SubElement(new_object, 'description')
+        description.text = 'None'
+        possibleresult = ET.SubElement(new_object, 'possibleresult')
+        name = ET.SubElement(possibleresult, 'name')
+        name.text = obj.class_name
+        points = ET.SubElement(new_object, 'points')
+        for pos in obj.points:
+            point_pos = ET.SubElement(points, 'point')
+            point_pos.text = f"{'{:.2f}'.format(pos[0])},{'{:.2f}'.format(pos[1])}"
+        # # 将新的 object 元素添加到 objects 元素中
+        objects.append(new_object)
+        indent(root)
+
+    # 保存修改后的 XML 文件
+    tree.write(f'{classified_folder_path}/{os.path.splitext(os.path.basename(file_path))[0]}.xml', encoding='utf-8', xml_declaration=True)
+    pass
+
+
+# if __name__ == '__main__':
+def exchange_class(results_folder_path,gt_folder_path,classified_folder_path):
+    file_pattern = os.path.join(results_folder_path, '**', '*')
+    file_list = glob.glob(file_pattern, recursive=True)
+    for result_file_path in tqdm(file_list):
+        img_name = os.path.splitext(os.path.basename(result_file_path))[0]
+        gt_file_path = os.path.join(gt_folder_path, f"{img_name}.xml")
+        assert os.path.isfile(gt_file_path), f"gt file not found: {gt_file_path}"
+        # print(f'\nprocessing image: {img_name}')
+        new_objects = evaluate_image(result_file_path, gt_file_path)
+        if len(new_objects) <= 0:
+            print(f'image {img_name} has no object')
+            continue
+        make_xml(result_file_path, new_objects,classified_folder_path)
+        

@@ -20,9 +20,10 @@ from mmrotate.datasets import build_dataset
 from mmrotate.models import build_detector
 from mmrotate.utils import collect_env, get_root_logger, setup_multi_processes
 
-os.environ['MASTER_ADDR'] = 'localhost'
-os.environ['MASTER_PORT'] = '5668'
+# os.environ['MASTER_ADDR'] = 'localhost'
+# os.environ['MASTER_PORT'] = '5566'
 # torch.backends.cudnn.enable =True
+torch.backends.cudnn.enabled = False
 # torch.backends.cudnn.benchmark = True
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
@@ -76,15 +77,17 @@ def parse_args():
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
     args = parser.parse_args()
+    print(args.local_rank)
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
-    # print(str(args.local_rank))
+        print(str(args.local_rank))
     return args
 
 
 def main():
     # torch.distributed.init_process_group('nccl',init_method='env://',world_size=1,rank=0)
     args = parse_args()
+    print(args)
     # import ipdb;ipdb.set_trace()
 
     cfg = Config.fromfile(args.config)
@@ -113,7 +116,8 @@ def main():
         cfg.gpu_ids = args.gpu_ids
     else:
         cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
-
+    
+    
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         torch.distributed.init_process_group(backend="nccl",world_size=1,rank=0)
@@ -131,7 +135,7 @@ def main():
         # re-set gpu_ids with distributed training mode
         _, world_size = get_dist_info()
         cfg.gpu_ids = range(world_size)
-
+    # import ipdb;ipdb.set_trace()
     # create work_dir
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     # dump config
@@ -170,9 +174,11 @@ def main():
         cfg.model,
         train_cfg=cfg.get('train_cfg'),
         test_cfg=cfg.get('test_cfg'))
+    print(model)
     model.init_weights()
-
+    print("check1!")
     datasets = [build_dataset(cfg.data.train)]
+    print(datasets)
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
@@ -186,6 +192,7 @@ def main():
     # add an attribute for visualization convenience
     model.CLASSES = datasets[0].CLASSES
     # import ipdb;ipdb.set_trace()
+    print("check2!")
 
     train_detector(
         model,

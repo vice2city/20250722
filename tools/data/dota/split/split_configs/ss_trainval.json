@@ -1,12 +1,12 @@
 {
   "nproc": 10,
   "img_dirs": [
-    "data/DOTA/train/images/",
-    "data/DOTA/val/images/"
+    "/data5/laiping/tianzhibei/pretrain_datasets/DOTA/train/images/",
+    "/data5/laiping/tianzhibei/pretrain_datasets/DOTA/val/images/"
   ],
   "ann_dirs": [
-    "data/DOTA/train/labelTxt/",
-    "data/DOTA/val/labelTxt/"
+    "/data5/laiping/tianzhibei/pretrain_datasets/DOTA/train/labelTxt-v1.5/labelTxt/",
+    "/data5/laiping/tianzhibei/pretrain_datasets/DOTA/val/labelTxt-v1.5/labelTxt/"
   ],
   "sizes": [
     1024

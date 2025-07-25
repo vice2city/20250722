@@ -43,6 +43,7 @@ def build_loss(cfg):
 
 
 def build_detector(cfg, train_cfg=None, test_cfg=None):
+    # import ipdb;ipdb.set_trace()
     """Build detector."""
     if train_cfg is not None or test_cfg is not None:
         warnings.warn(

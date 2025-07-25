@@ -23,6 +23,6 @@
     116,
     124
   ],
-  "save_dir": "data/split_ss_car_all/train/",
+  "save_dir": "data/car_det_train/train/",
   "save_ext": ".png"
 }

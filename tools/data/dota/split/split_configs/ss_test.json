@@ -1,7 +1,7 @@
 {
   "nproc": 10,
   "img_dirs": [
-    "data/DOTA/test/images/"
+    "/data5/laiping/tianzhibei/pretrain_datasets/DOTA/test/images/"
   ],
   "ann_dirs": null,
   "sizes": [

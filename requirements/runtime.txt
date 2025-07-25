@@ -6,4 +6,3 @@ numpy
 pycocotools
 six
 terminaltables
-torch

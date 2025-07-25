@@ -32,6 +32,7 @@ def tpfp_default(det_bboxes,
     """
     # an indicator of ignored gts
     det_bboxes = np.array(det_bboxes)
+    # gt_bboxes = np.array(gt_bboxes)
     gt_ignore_inds = np.concatenate(
         (np.zeros(gt_bboxes.shape[0],
                   dtype=bool), np.ones(gt_bboxes_ignore.shape[0], dtype=bool)))

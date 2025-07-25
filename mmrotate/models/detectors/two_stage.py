@@ -61,12 +61,19 @@ class RotatedTwoStageDetector(RotatedBaseDetector):
     def with_roi_head(self):
         """bool: whether the detector has a RoI head"""
         return hasattr(self, 'roi_head') and self.roi_head is not None
-
+ 
     def extract_feat(self, img):
         """Directly extract features from the backbone+neck."""
-        x = self.backbone(img)
-        if self.with_neck:
-            x = self.neck(x)
+        # img = img.to(torch.float32)
+        try:
+            x = self.backbone(img)
+            if self.with_neck:
+                x = self.neck(x)
+        except:
+            img = img.data[0].to(torch.float32)
+            x = self.backbone(img)
+            if self.with_neck:
+                x = self.neck(x)
         return x
 
     def forward_dummy(self, img):
@@ -174,7 +181,12 @@ class RotatedTwoStageDetector(RotatedBaseDetector):
         """Test without augmentation."""
 
         assert self.with_bbox, 'Bbox head must be implemented.'
-        x = self.extract_feat(img)
+        try:
+            x = self.extract_feat(img)
+        except:
+            img = img.data[0]
+            img_metas = img_metas.data[0]
+            x = self.extract_feat(img)
         if proposals is None:
             proposal_list = self.rpn_head.simple_test_rpn(x, img_metas)
         else:
@@ -182,6 +194,7 @@ class RotatedTwoStageDetector(RotatedBaseDetector):
 
         return self.roi_head.simple_test(
             x, proposal_list, img_metas, rescale=rescale)
+    # bbox_roi_extractor feature
 
     def aug_test(self, imgs, img_metas, rescale=False):
         """Test with augmentations.

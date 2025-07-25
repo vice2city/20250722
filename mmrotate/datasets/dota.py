@@ -248,6 +248,8 @@ class DOTADataset(CustomDataset):
             x, y = int(x_y_2[0]), int(x_y_2[1])
             new_result = []
             for i, dets in enumerate(result):
+                # if i in [2,3,4,9,10,13]:
+                #     continue
                 bboxes, scores = dets[:, :-1], dets[:, [-1]]
                 ori_bboxes = bboxes.copy()
                 ori_bboxes[..., :2] = ori_bboxes[..., :2] + np.array(
@@ -321,7 +323,35 @@ class DOTADataset(CustomDataset):
 
         return files
 
-    def format_results(self, results, submission_dir=None, nproc=4, **kwargs):
+    def _results2bboxs(self, id_list, dets_list, out_folder=None):
+        """Generate the submission of full images.
+
+        Args:
+            id_list (list): Id of images.
+            dets_list (list): Detection results of per class.
+            out_folder (str, optional): Folder of submission.
+        """
+        results = []
+        # confidence = 0.8
+        confidence = 0.6
+        for img_id, dets_per_cls in zip(id_list, dets_list):
+            for cls, dets in zip(self.CLASSES, dets_per_cls):
+                if dets.size == 0:
+                    continue
+                bboxes = obb2poly_np(dets, self.version)
+                for bbox in bboxes:
+                    if bbox[-1] - confidence > 0:
+                        txt_element = [img_id, cls, str(bbox[-1])] + [f'{p:.2f}' for p in bbox[:-1]]
+                        results.append(txt_element)
+                    
+                    # txt_element = [img_id, cls, str(bbox[-1])] + [f'{p:.2f}' for p in bbox[:-1]]
+                    # results.append(txt_element)
+
+        return results
+
+
+
+    def format_results(self, results,bboxes_flag=False, submission_dir=None, nproc=1, **kwargs):
         """Format the results to submission text (standard format for DOTA
         evaluation).
 
@@ -339,7 +369,10 @@ class DOTADataset(CustomDataset):
                 - tmp_dir (str): the temporal directory created for saving \
                     json files when submission_dir is not specified.
         """
+        # import ipdb;ipdb.set_trace()
+
         nproc = min(nproc, os.cpu_count())
+        # import ipdb;ipdb.set_trace()
         assert isinstance(results, list), 'results must be a list'
         assert len(results) == len(self), (
             f'The length of results is not equal to '
@@ -355,11 +388,13 @@ class DOTADataset(CustomDataset):
         # import ipdb;ipdb.set_trace()
         stop_time = time.time()
         print(f'Used time: {(stop_time - start_time):.1f} s')
+        if bboxes_flag:
+            bboxes = self._results2bboxs(id_list,dets_list)
+            return bboxes
+        else:
+            result_files = self._results2submission(id_list, dets_list, submission_dir)
+            return result_files, tmp_dir
 
-        result_files = self._results2submission(id_list, dets_list,
-                                                submission_dir)
-
-        return result_files, tmp_dir
 
 
 def _merge_func(info, CLASSES, iou_thr):
@@ -379,10 +414,11 @@ def _merge_func(info, CLASSES, iou_thr):
         if len(dets[labels == i]) == 0:
             big_img_results.append(dets[labels == i])
         else:
-            try:
-                cls_dets = torch.from_numpy(dets[labels == i]).cuda()
-            except:  # noqa: E722
-                cls_dets = torch.from_numpy(dets[labels == i])
+            # try:
+                # cls_dets = torch.from_numpy(dets[labels == i]).cuda()
+            # except:  # noqa: E722
+                # cls_dets = torch.from_numpy(dets[labels == i])
+            cls_dets = torch.from_numpy(dets[labels == i])
             nms_dets, keep_inds = nms_rotated(cls_dets[:, :5], cls_dets[:, -1],
                                               iou_thr)
             big_img_results.append(nms_dets.cpu().numpy())

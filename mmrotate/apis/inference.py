@@ -11,6 +11,7 @@ from mmrotate.core import get_multiscale_patch, merge_results, slide_window
 
 
 def inference_detector_by_patches(model,
+                                  cfg,
                                   img,
                                   sizes,
                                   steps,
@@ -35,7 +36,7 @@ def inference_detector_by_patches(model,
         list[np.ndarray]: Detection results.
     """
     assert bs >= 1, 'The batch size must greater than or equal to 1'
-    cfg = model.cfg
+    # cfg = model.cfg
     device = next(model.parameters()).device  # model device
     cfg = cfg.copy()
     # set loading pipeline type

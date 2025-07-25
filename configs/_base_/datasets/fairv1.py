@@ -1,6 +1,7 @@
 # dataset settings
 dataset_type = 'FairDataset'
-data_root = "data/fair1_0_to_DOTA_split/"
+data_root = "/data5/laiping/tianzhibei/data/fair1m_v2_wlssknet/"
+classes = ('Boeing737', 'Boeing777', 'Boeing747', 'Boeing787', 'A321', 'A220', 'A330', 'A350', 'C919', 'ARJ21', 'other-airplane', 'Passenger_Ship', 'Motorboat', 'Fishing_Boat', 'Tugboat', 'Engineering_Ship', 'Liquid_Cargo_Ship', 'Dry_Cargo_Ship', 'Warship', 'other-ship', 'Small_Car', 'Bus', 'Cargo_Truck', 'Dump_Truck', 'Van', 'Trailer', 'Tractor', 'Truck_Tractor', 'Excavator', 'other-vehicle', 'Baseball_Field', 'Basketball_Court', 'Football_Field', 'Tennis_Court', 'Roundabout', 'Intersection', 'Bridge')
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -37,8 +38,8 @@ data = dict(
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'train/annfiles/',
-        img_prefix=data_root + 'train/images/',
+        ann_file=data_root + 'val/annfiles/',
+        img_prefix=data_root + 'val/images/',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
