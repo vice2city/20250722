@@ -1,0 +1,28 @@
+{
+  "nproc": 10,
+  "img_dirs": [
+    "/data5/laiping/tianzhibei/pretrain_datasets/FAIR1M/train/input_path/"
+  ],
+  "ann_dirs": [
+    "/data5/laiping/tianzhibei/pretrain_datasets/FAIR1M/train/labeltxt/"
+  ],
+  "sizes": [
+    1024
+  ],
+  "gaps": [
+    256
+  ],
+  "rates": [
+    1.0
+  ],
+  "img_rate_thr": 0.6,
+  "iof_thr": 0.7,
+  "no_padding": false,
+  "padding_value": [
+    104,
+    116,
+    124
+  ],
+  "save_dir": "/data5/laiping/tianzhibei/data/fair1m_v2_wlssknet/train/",
+  "save_ext": ".png"
+}
