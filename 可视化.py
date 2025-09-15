@@ -4,11 +4,11 @@ from PIL import Image, ImageDraw
 
 # --- 1. 配置路径 ---
 # 图像文件夹路径
-IMAGE_DIR = '/home/xueyijun/data/Vicy/datasets/20250721/'
+IMAGE_DIR = '/mnt/hdd1/xueyijun/Vicy/object_detection/data/SAT-MTB/SAT-MTB/images'
 # XML文件夹路径
-XML_DIR = '/mnt/hdd1/xueyijun/Vicy/object_detection/outputs/20250724/xml_output'
+XML_DIR = '/mnt/hdd1/xueyijun/Vicy/object_detection/outputs/20250806/xml_output'
 # 输出结果的文件夹路径
-OUTPUT_DIR = '/mnt/hdd1/xueyijun/Vicy/object_detection/outputs/20250724/vis'
+OUTPUT_DIR = '/mnt/hdd1/xueyijun/Vicy/object_detection/outputs/20250806/vis'
 # 我们只关心的目标类别
 TARGET_CLASS = 'ship'
 # 绘制框的颜色和线宽
@@ -41,7 +41,7 @@ def draw_boxes_on_image():
             root = tree.getroot()
 
             # 获取图像文件名
-            image_filename = root.find('source/filename').text
+            image_filename = os.path.splitext(root.find('source/filename').text)[0] + '.png'
             image_path = os.path.join(IMAGE_DIR, image_filename)
 
             # 检查图像文件是否存在

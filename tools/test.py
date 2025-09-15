@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
+import glob
 import os
 import os.path as osp
 import time
@@ -18,7 +19,21 @@ from mmdet.datasets import build_dataloader, replace_ImageToTensor
 from mmrotate.datasets import build_dataset
 from mmrotate.models import build_detector
 from mmrotate.utils import compat_cfg, setup_multi_processes
-from tools import filter
+from tools import filter, add_xml
+
+
+def get_file_names(folder_path):
+    # file_names = glob.glob(os.path.join(folder_path, '*.jpg'))
+    # jpg_files = glob.glob(os.path.join(folder_path, '*.jpg'))
+    tif_files = glob.glob(os.path.join(folder_path, '*.tif'))
+    # png_files = glob.glob(os.path.join(folder_path, '*.png'))
+
+    # 合并后缀为jpg或者tif的文件列表
+    # all_files = jpg_files + tif_files + png_files
+    all_files = tif_files
+    file_names = [os.path.splitext(os.path.basename(file))[0] for file in all_files if os.path.isfile(file)]
+    return file_names
+
 
 def parse_args():
     """Parse parameters."""
@@ -92,6 +107,8 @@ def parse_args():
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--save_dirs', type=str, default=False)
+    parser.add_argument('--xml_output_path', type=str, default="")
+    parser.add_argument("--gallery_path", type=str, default="")
 
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
@@ -103,6 +120,10 @@ def parse_args():
 def main():
     args = parse_args()
     start_time = time.time()
+    files_list = get_file_names(args.gallery_path)
+    print(len(files_list))
+    for files in files_list:
+        add_xml.create_blank_xml(files, args.xml_output_path, "Optical")
 
     assert args.out or args.eval or args.format_only or args.show \
            or args.show_dir, \
@@ -257,7 +278,7 @@ def main():
         outputs = multi_gpu_test(model, data_loader, args.tmpdir,
                                  args.gpu_collect)
 
-    outputs = filter.filter_bboxes(outputs)
+    # outputs = filter.filter_bboxes(outputs, 0.5)
 
     rank, _ = get_dist_info()
     if rank == 0:
@@ -281,6 +302,8 @@ def main():
             metric_dict = dict(config=args.config, metric=metric)
             if args.work_dir is not None and rank == 0:
                 mmcv.dump(metric_dict, json_file)
+
+    add_xml.main(args.eval_options["submission_dir"], args.xml_output_path)
 
 
 if __name__ == '__main__':

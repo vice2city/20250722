@@ -14,7 +14,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/test.py" />
-    <option name="PARAMETERS" value="$USER_HOME$/data/Vicy/object_detection/configs/lsknet/lsk_s_ema_fpn_1x_dota_le90.py $USER_HOME$/data/Vicy/object_detection/data/checkpoint/lsk_s_ema_fpn_1x_dota_le90_20230212-30ed4041.pth --show-dir $USER_HOME$/data/Vicy/object_detection/outputs/20250723/vis --format-only --save_dirs $USER_HOME$/data/Vicy/object_detection/outputs/20250721/test --eval-options submission_dir=$USER_HOME$/data/Vicy/object_detection/20250721/outputs/work_dirs" />
+    <option name="PARAMETERS" value="$USER_HOME$/data/Vicy/object_detection/configs/lsknet/lsk_s_ema_fpn_1x_dota_le90.py $USER_HOME$/data/Vicy/object_detection/data/checkpoint/lsk_s_ema_fpn_1x_dota_le90_20230212-30ed4041.pth --show-dir $USER_HOME$/data/Vicy/object_detection/outputs/20250729/vis --format-only --save_dirs $USER_HOME$/data/Vicy/object_detection/outputs/20250721/test --eval-options submission_dir=$USER_HOME$/data/Vicy/object_detection/outputs/20250729/work_dirs --xml_output_path $USER_HOME$/data/Vicy/object_detection/outputs/20250729/xml_output --gallery_path $USER_HOME$/data/Vicy/datasets/20250721/" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />

@@ -30,13 +30,13 @@ from prettytable import PrettyTable
 
 def get_file_names(folder_path):
     # file_names = glob.glob(os.path.join(folder_path, '*.jpg'))
-    # jpg_files = glob.glob(os.path.join(folder_path, '*.jpg'))
+    jpg_files = glob.glob(os.path.join(folder_path, '*.jpg'))
     tif_files = glob.glob(os.path.join(folder_path, '*.tif'))
-    # png_files = glob.glob(os.path.join(folder_path, '*.png'))
+    png_files = glob.glob(os.path.join(folder_path, '*.png'))
 
     # 合并后缀为jpg或者tif的文件列表
-    # all_files = jpg_files + tif_files + png_files
-    all_files = tif_files
+    all_files = jpg_files + tif_files + png_files
+    # all_files = tif_files
     file_names = [os.path.splitext(os.path.basename(file))[0] for file in all_files if os.path.isfile(file)]
     return file_names
 
@@ -311,7 +311,7 @@ def fairv2_test(args):
         outputs = multi_gpu_test(model, data_loader, args.tmpdir,
                                  args.gpu_collect)
     # import ipdb;ipdb.set_trace()
-    outputs = filter.filter_bboxes(outputs)
+    outputs = filter.filter_bboxes(outputs, 0.5)
 
     rank, _ = get_dist_info()
     if rank == 0:
@@ -366,7 +366,7 @@ def main():
     params = fairv2_test(args)
     avg_times = params['total_time'] / len(files_list) * 1000  # ms
 
-    if args.evaluation:
+    if args.evaluation is True:
         evaluation_iou.main(args.xml_output_path, args.gallery_gt)
         # evaluation_iou_dota.main(args.xml_output_path,args.gallery_gt)
         evaluation_tool.main(args.xml_output_path, args.gallery_gt)

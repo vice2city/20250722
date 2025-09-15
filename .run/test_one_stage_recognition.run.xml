@@ -15,7 +15,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_one_stage_recognition.py" />
-    <option name="PARAMETERS" value="--gallery_path $USER_HOME$/data/Vicy/datasets/20250721/ --gallery_gt $USER_HOME$/data/Vicy/datasets/20250721/gt/ --xml_output_path $USER_HOME$/data/Vicy/object_detection/outputs/20250724/xml_output --eval-options submission_dir=$USER_HOME$/data/Vicy/object_detection/outputs/20250724/work_dirs --checkpoint $USER_HOME$/data/Vicy/object_detection/data/checkpoint/lsk_s_fpn_1x_dota_le90_20230116-99749191.pth --config $USER_HOME$/data/Vicy/object_detection/configs/lsknet/lsk_s_fpn_1x_dota_le90.py --save_dirs $USER_HOME$/data/Vicy/object_detection/outputs/20250724/test --evaluation False" />
+    <option name="PARAMETERS" value="--gallery_path $USER_HOME$/data/Vicy/datasets/SAT-MTB/SAT-MTB/images --xml_output_path $USER_HOME$/data/Vicy/object_detection/outputs/20250806/xml_output --eval-options submission_dir=$USER_HOME$/data/Vicy/object_detection/outputs/20250806/work_dirs --checkpoint $USER_HOME$/data/Vicy/object_detection/data/checkpoint/lsk_s_ema_fpn_1x_dota_le90_20230212-30ed4041.pth --config $USER_HOME$/data/Vicy/object_detection/configs/lsknet/lsk_s_ema_fpn_1x_dota_le90.py --save_dirs $USER_HOME$/data/Vicy/object_detection/outputs/20250806/test --evaluation False" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
