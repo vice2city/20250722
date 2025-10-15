@@ -4,6 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import mmcv
+from model_archiver import ModelArchiverConfig
 
 try:
     from model_archiver.model_packaging import package_model
@@ -49,22 +50,23 @@ def mmrotate2torchserve(
     with TemporaryDirectory() as tmpdir:
         config.dump(f'{tmpdir}/config.py')
 
-        args = Namespace(
-            **{
-                'model_file': f'{tmpdir}/config.py',
-                'serialized_file': checkpoint_file,
-                'handler': f'{Path(__file__).parent}/mmrotate_handler.py',
-                'model_name': model_name or Path(checkpoint_file).stem,
-                'version': model_version,
-                'export_path': output_folder,
-                'force': force,
-                'requirements_file': None,
-                'extra_files': None,
-                'runtime': 'python',
-                'archive_format': 'default'
-            })
-        manifest = ModelExportUtils.generate_manifest_json(args)
-        package_model(args, manifest)
+        args_list = Namespace(
+                model_file=f'{tmpdir}/config.py',
+                serialized_file=checkpoint_file,
+                handler=f'{Path(__file__).parent}/mmrotate_handler.py',
+                model_name=model_name or Path(checkpoint_file).stem,
+                version=model_version,
+                export_path=output_folder,
+                force=force,
+                requirements_file=None,
+                extra_files=None,
+                runtime='python',
+                archive_format='default',
+                config_file=None
+        )
+        model_config = ModelArchiverConfig.from_args(args_list)
+        manifest = ModelExportUtils.generate_manifest_json(model_config)
+        package_model(model_config, manifest)
 
 
 def parse_args():

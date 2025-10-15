@@ -622,4 +622,9 @@ def main(input_path,save_path):
     # return args.save_dir
 
 if __name__ == '__main__':
-    main("/data5/laiping/tianzhibei/data/webtest","/data5/laiping/tianzhibei/data/webtest-1")
+    parser = argparse.ArgumentParser(description="切片程序")
+    parser.add_argument("input_path", help="输入图片目录")
+    parser.add_argument("save_path", help="输出切片目录")
+    args = parser.parse_args()
+
+    main(args.input_path, args.save_path)
