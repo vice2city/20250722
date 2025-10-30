@@ -1,0 +1,7 @@
+name: open-mmlab
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pip
+prefix: /opt/conda/envs/open-mmlab

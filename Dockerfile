@@ -12,9 +12,10 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/20250722
-RUN mamba create -n open-mmlab python=3.8 -y
+COPY . .
+RUN mamba env create -f environment.yml
 SHELL ["/bin/bash", "--login", "-c"]
-RUN mamba shell init --shell bash --root-prefix=~/.local/share/mamba
+RUN mamba shell init --shell bash --root-prefix=/opt/conda/
 RUN echo "mamba activate open-mmlab" >> ~/.bashrc
 ENV PATH=/opt/conda/envs/open-mmlab/bin:$PATH
 ENV MAMBA_DEFAULT_ENV=open-mmlab
@@ -22,8 +23,7 @@ ENV MAMBA_DEFAULT_ENV=open-mmlab
 RUN pip install torch==1.12.1+cpu torchvision==0.13.1+cpu -f https://download.pytorch.org/whl/torch_stable.html && \
     pip install torchserve==0.2.0 torch-model-archiver timm==1.0.17 transformers==4.46.3 && \
     pip install -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.12/index.html mmcv-full==1.6.2 mmdet==2.28.2
-RUN mamba install conda-forge::transformers
-COPY . .
+RUN pip install tokenizers==0.13.3 transformers==4.29.1
 RUN pip install --no-cache-dir -e . && \
     mamba clean --all -f -y
 
@@ -40,4 +40,9 @@ RUN cp docker/serve/config.properties /home/model-server/config.properties && \
 USER model-server
 WORKDIR /home/model-server
 ENV TEMP=/home/model-server/tmp
+SHELL ["/bin/bash", "--login", "-c"]
+RUN mamba shell init --shell bash --root-prefix=/opt/conda/
+RUN echo "mamba activate open-mmlab" >> ~/.bashrc
+ENV PATH=/opt/conda/envs/open-mmlab/bin:$PATH
+ENV MAMBA_DEFAULT_ENV=open-mmlab
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
